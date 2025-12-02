@@ -3,15 +3,50 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>模特图效果众测</title>
+    <title>模特图效果众测 | Model Image Survey</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Malgun Gothic', sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             color: #333;
+        }
+        
+        /* 语言选择器 */
+        .lang-selector {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 100;
+            display: flex;
+            gap: 8px;
+            background: rgba(255,255,255,0.95);
+            padding: 8px 12px;
+            border-radius: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        
+        .lang-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.3s;
+            background: transparent;
+            color: #666;
+        }
+        
+        .lang-btn:hover {
+            background: #f0f0f0;
+        }
+        
+        .lang-btn.active {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
         }
         
         .container {
@@ -39,7 +74,7 @@
         }
         
         .welcome-card h1 {
-            font-size: 2.5rem;
+            font-size: 2.2rem;
             margin-bottom: 20px;
             background: linear-gradient(135deg, #667eea, #764ba2);
             -webkit-background-clip: text;
@@ -107,6 +142,7 @@
         .test-screen {
             display: none;
             padding: 30px 20px;
+            padding-top: 80px;
         }
         
         .progress-bar {
@@ -160,10 +196,11 @@
         
         .question-text {
             text-align: center;
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             color: #333;
             margin-bottom: 30px;
             font-weight: 500;
+            line-height: 1.6;
         }
         
         .options-grid {
@@ -344,11 +381,13 @@
             border-radius: 12px;
             padding: 20px;
             margin-bottom: 30px;
+            text-align: left;
         }
         
         .stats-summary h3 {
             color: #333;
             margin-bottom: 15px;
+            text-align: center;
         }
         
         .stats-row {
@@ -360,27 +399,6 @@
         
         .stats-row:last-child {
             border-bottom: none;
-        }
-        
-        /* Loading */
-        .loading {
-            text-align: center;
-            padding: 40px;
-            color: white;
-        }
-        
-        .spinner {
-            width: 50px;
-            height: 50px;
-            border: 4px solid rgba(255,255,255,0.3);
-            border-top-color: white;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 20px;
-        }
-        
-        @keyframes spin {
-            to { transform: rotate(360deg); }
         }
         
         /* Image modal */
@@ -415,21 +433,28 @@
     </style>
 </head>
 <body>
+    <!-- 语言选择器 -->
+    <div class="lang-selector">
+        <button class="lang-btn active" onclick="setLanguage('zh')">中文</button>
+        <button class="lang-btn" onclick="setLanguage('en')">EN</button>
+        <button class="lang-btn" onclick="setLanguage('ko')">한국어</button>
+    </div>
+
     <!-- 欢迎页面 -->
     <div id="welcomeScreen" class="welcome-screen">
         <div class="welcome-card">
-            <h1>🎨 模特图效果众测</h1>
-            <p>
+            <h1 data-i18n="title">🎨 模特图效果众测</h1>
+            <p data-i18n="welcome_desc">
                 感谢您参与本次众测！<br><br>
                 您将看到一系列商品图及其对应的模特展示图。<br>
                 请选择您认为最吸引人的那张照片。<br><br>
                 预计用时：5-10分钟
             </p>
             <div class="user-input">
-                <label for="userId">请输入您的用户ID（昵称）</label>
-                <input type="text" id="userId" placeholder="例如：张三" maxlength="50">
+                <label for="userId" data-i18n="user_id_label">请输入您的用户ID（昵称）</label>
+                <input type="text" id="userId" data-i18n-placeholder="user_id_placeholder" placeholder="例如：张三" maxlength="50">
             </div>
-            <button class="btn btn-primary" id="startBtn" onclick="startTest()">开始评测</button>
+            <button class="btn btn-primary" id="startBtn" onclick="startTest()" data-i18n="start_btn">开始评测</button>
         </div>
     </div>
     
@@ -443,11 +468,11 @@
             
             <div class="test-card">
                 <div class="product-section">
-                    <h2>📦 商品图</h2>
-                    <img id="productImage" class="product-image" src="" alt="商品图" onclick="showModal(this.src)">
+                    <h2 data-i18n="product_image">📦 商品图</h2>
+                    <img id="productImage" class="product-image" src="" alt="Product" onclick="showModal(this.src)">
                 </div>
                 
-                <div class="question-text">
+                <div class="question-text" data-i18n="question_text">
                     请选择全部你觉得在社媒看到可以吸引到你的照片（可多选），如都不满意选择"都不满意"
                 </div>
                 
@@ -456,14 +481,14 @@
                 </div>
                 
                 <div class="none-option">
-                    <button class="none-btn" id="noneBtn" onclick="selectNone()">
+                    <button class="none-btn" id="noneBtn" onclick="selectNone()" data-i18n="none_btn">
                         😕 都不满意
                     </button>
                 </div>
                 
                 <div class="action-buttons">
-                    <button class="btn btn-secondary" id="prevBtn" onclick="prevQuestion()" style="display:none">上一题</button>
-                    <button class="btn btn-primary" id="nextBtn" onclick="nextQuestion()" disabled>下一题</button>
+                    <button class="btn btn-secondary" id="prevBtn" onclick="prevQuestion()" style="display:none" data-i18n="prev_btn">上一题</button>
+                    <button class="btn btn-primary" id="nextBtn" onclick="nextQuestion()" disabled data-i18n="next_btn">下一题</button>
                 </div>
             </div>
         </div>
@@ -473,13 +498,13 @@
     <div id="completeScreen" class="complete-screen">
         <div class="complete-card">
             <div class="complete-icon">🎉</div>
-            <h2>感谢您的参与！</h2>
-            <p>您的评测结果已保存</p>
+            <h2 data-i18n="complete_title">感谢您的参与！</h2>
+            <p data-i18n="complete_desc">您的评测结果已保存</p>
             <div class="stats-summary" id="statsSummary">
-                <h3>您的选择统计</h3>
+                <h3 data-i18n="stats_title">您的选择统计</h3>
                 <div id="userStats"></div>
             </div>
-            <button class="btn btn-primary" onclick="location.reload()">再次评测</button>
+            <button class="btn btn-primary" onclick="location.reload()" data-i18n="restart_btn">再次评测</button>
         </div>
     </div>
     
@@ -490,14 +515,162 @@
     </div>
     
     <script>
+        // 多语言翻译
+        const translations = {
+            zh: {
+                title: '🎨 模特图效果众测',
+                welcome_desc: '感谢您参与本次众测！<br><br>您将看到一系列商品图及其对应的模特展示图。<br>请选择您认为最吸引人的那张照片。<br><br>预计用时：5-10分钟',
+                user_id_label: '请输入您的用户ID（昵称）',
+                user_id_placeholder: '例如：张三',
+                start_btn: '开始评测',
+                loading: '加载中...',
+                product_image: '📦 商品图',
+                question_text: '请选择全部你觉得在社媒看到可以吸引到你的照片（可多选），如都不满意选择"都不满意"',
+                none_btn: '😕 都不满意',
+                prev_btn: '上一题',
+                next_btn: '下一题',
+                submit_btn: '提交',
+                submitting: '提交中...',
+                complete_title: '感谢您的参与！',
+                complete_desc: '您的评测结果已保存',
+                stats_title: '您的选择统计',
+                restart_btn: '再次评测',
+                progress: '第 {current} 题 / 共 {total} 题',
+                image_label: '图像 {num}',
+                stats_simple: '简单版被选中',
+                stats_extended: '扩展版被选中',
+                stats_no_reference: '不垫图版被选中',
+                stats_no_reference_model: '不垫图版模特被选中',
+                stats_none: '都不满意',
+                times: '次',
+                alert_select: '请至少选择一个选项',
+                alert_user_id: '请输入用户ID',
+                alert_load_fail: '加载数据失败'
+            },
+            en: {
+                title: '🎨 Model Image Survey',
+                welcome_desc: 'Thank you for participating!<br><br>You will see product images and their model display photos.<br>Please select the photos that attract you the most.<br><br>Estimated time: 5-10 minutes',
+                user_id_label: 'Please enter your User ID (nickname)',
+                user_id_placeholder: 'e.g., John',
+                start_btn: 'Start Survey',
+                loading: 'Loading...',
+                product_image: '📦 Product Image',
+                question_text: 'Select all photos that would attract you on social media (multiple selection allowed). If none are satisfactory, select "None"',
+                none_btn: '😕 None of them',
+                prev_btn: 'Previous',
+                next_btn: 'Next',
+                submit_btn: 'Submit',
+                submitting: 'Submitting...',
+                complete_title: 'Thank you!',
+                complete_desc: 'Your results have been saved',
+                stats_title: 'Your Selection Stats',
+                restart_btn: 'Start Again',
+                progress: 'Question {current} / {total}',
+                image_label: 'Image {num}',
+                stats_simple: 'Simple version selected',
+                stats_extended: 'Extended version selected',
+                stats_no_reference: 'No-reference version selected',
+                stats_no_reference_model: 'No-reference model selected',
+                stats_none: 'None satisfactory',
+                times: 'times',
+                alert_select: 'Please select at least one option',
+                alert_user_id: 'Please enter your User ID',
+                alert_load_fail: 'Failed to load data'
+            },
+            ko: {
+                title: '🎨 모델 이미지 설문조사',
+                welcome_desc: '설문조사에 참여해 주셔서 감사합니다!<br><br>상품 이미지와 모델 착용 사진을 보게 됩니다.<br>가장 마음에 드는 사진을 선택해 주세요.<br><br>예상 소요 시간: 5-10분',
+                user_id_label: '사용자 ID(닉네임)를 입력해 주세요',
+                user_id_placeholder: '예: 홍길동',
+                start_btn: '설문 시작',
+                loading: '로딩 중...',
+                product_image: '📦 상품 이미지',
+                question_text: 'SNS에서 보면 끌릴 것 같은 사진을 모두 선택해 주세요 (복수 선택 가능). 마음에 드는 것이 없으면 "없음"을 선택해 주세요',
+                none_btn: '😕 마음에 드는 것 없음',
+                prev_btn: '이전',
+                next_btn: '다음',
+                submit_btn: '제출',
+                submitting: '제출 중...',
+                complete_title: '감사합니다!',
+                complete_desc: '결과가 저장되었습니다',
+                stats_title: '선택 통계',
+                restart_btn: '다시 시작',
+                progress: '{current}번 / 총 {total}문항',
+                image_label: '이미지 {num}',
+                stats_simple: '심플 버전 선택',
+                stats_extended: '확장 버전 선택',
+                stats_no_reference: '노레퍼런스 버전 선택',
+                stats_no_reference_model: '노레퍼런스 모델 선택',
+                stats_none: '마음에 드는 것 없음',
+                times: '회',
+                alert_select: '최소 하나의 옵션을 선택해 주세요',
+                alert_user_id: '사용자 ID를 입력해 주세요',
+                alert_load_fail: '데이터 로드 실패'
+            }
+        };
+        
+        let currentLang = 'zh';
+        
+        // 设置语言
+        function setLanguage(lang) {
+            currentLang = lang;
+            
+            // 更新语言按钮状态
+            document.querySelectorAll('.lang-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            // 找到对应的按钮并激活
+            const langMap = {'zh': 0, 'en': 1, 'ko': 2};
+            const buttons = document.querySelectorAll('.lang-btn');
+            if (buttons[langMap[lang]]) {
+                buttons[langMap[lang]].classList.add('active');
+            }
+            
+            // 更新所有带 data-i18n 的元素
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (translations[lang][key]) {
+                    el.innerHTML = translations[lang][key];
+                }
+            });
+            
+            // 更新 placeholder
+            document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+                const key = el.getAttribute('data-i18n-placeholder');
+                if (translations[lang][key]) {
+                    el.placeholder = translations[lang][key];
+                }
+            });
+            
+            // 更新进度文本（如果在测试页面）
+            if (products.length > 0) {
+                updateProgressText();
+            }
+        }
+        
+        function t(key, params = {}) {
+            let text = translations[currentLang][key] || key;
+            Object.keys(params).forEach(k => {
+                text = text.replace(`{${k}}`, params[k]);
+            });
+            return text;
+        }
+        
+        function updateProgressText() {
+            document.getElementById('progressText').textContent = t('progress', {
+                current: currentIndex + 1,
+                total: products.length
+            });
+        }
+        
         // 全局变量
         let userId = '';
         let products = [];
         let currentIndex = 0;
         let results = [];
-        let currentSelections = []; // 改为数组支持多选
-        let isNoneSelected = false; // 是否选择了"都不满意"
-        let currentOrder = []; // 记录当前题目的随机顺序
+        let currentSelections = [];
+        let isNoneSelected = false;
+        let currentOrder = [];
         
         // 版本映射
         const VERSION_NAMES = {
@@ -516,11 +689,11 @@
         async function loadProducts() {
             try {
                 const response = await fetch('products.json?t=' + Date.now());
-                if (!response.ok) throw new Error('无法加载商品数据');
+                if (!response.ok) throw new Error(t('alert_load_fail'));
                 products = await response.json();
                 return true;
             } catch (error) {
-                alert('加载数据失败：' + error.message + '\n请确保已运行数据准备脚本。');
+                alert(t('alert_load_fail') + ': ' + error.message);
                 return false;
             }
         }
@@ -529,17 +702,17 @@
         async function startTest() {
             userId = document.getElementById('userId').value.trim();
             if (!userId) {
-                alert('请输入用户ID');
+                alert(t('alert_user_id'));
                 return;
             }
             
             document.getElementById('startBtn').disabled = true;
-            document.getElementById('startBtn').textContent = '加载中...';
+            document.getElementById('startBtn').textContent = t('loading');
             
             const loaded = await loadProducts();
             if (!loaded || products.length === 0) {
                 document.getElementById('startBtn').disabled = false;
-                document.getElementById('startBtn').textContent = '开始评测';
+                document.getElementById('startBtn').textContent = t('start_btn');
                 return;
             }
             
@@ -547,8 +720,8 @@
             results = products.map(p => ({
                 productId: p.id,
                 productName: p.name,
-                selections: [], // 改为数组支持多选
-                isNone: false,  // 是否选择了"都不满意"
+                selections: [],
+                isNone: false,
                 order: null
             }));
             
@@ -567,7 +740,7 @@
             // 更新进度
             const progress = ((index + 1) / products.length) * 100;
             document.getElementById('progressFill').style.width = progress + '%';
-            document.getElementById('progressText').textContent = `第 ${index + 1} 题 / 共 ${products.length} 题`;
+            updateProgressText();
             
             // 显示商品图
             document.getElementById('productImage').src = product.productImage;
@@ -589,23 +762,23 @@
                 card.onclick = () => selectOption(version);
                 
                 card.innerHTML = `
-                    <span class="option-label">图像 ${i + 1}</span>
+                    <span class="option-label">${t('image_label', {num: i + 1})}</span>
                     <span class="check-icon">✓</span>
-                    <img src="${imageSrc}" alt="图像 ${i + 1}">
-                    <span class="zoom-btn" onclick="event.stopPropagation(); showModal('${imageSrc}')" title="放大查看">🔍</span>
+                    <img src="${imageSrc}" alt="${t('image_label', {num: i + 1})}">
+                    <span class="zoom-btn" onclick="event.stopPropagation(); showModal('${imageSrc}')" title="Zoom">🔍</span>
                 `;
                 
                 optionsGrid.appendChild(card);
             });
             
-            // 恢复之前的选择（如果有）
+            // 恢复之前的选择
             currentSelections = results[index].selections ? [...results[index].selections] : [];
             isNoneSelected = results[index].isNone || false;
             updateSelectionUI();
             
             // 更新按钮状态
             document.getElementById('prevBtn').style.display = index > 0 ? 'inline-block' : 'none';
-            document.getElementById('nextBtn').textContent = index === products.length - 1 ? '提交' : '下一题';
+            document.getElementById('nextBtn').textContent = index === products.length - 1 ? t('submit_btn') : t('next_btn');
             document.getElementById('nextBtn').disabled = currentSelections.length === 0 && !isNoneSelected;
         }
         
@@ -618,22 +791,17 @@
             return array;
         }
         
-        // 选择选项（多选，与"都不满意"互斥）
+        // 选择选项
         function selectOption(version) {
-            // 选择图片时，清除"都不满意"状态
             isNoneSelected = false;
             
-            // 切换选中状态
             const idx = currentSelections.indexOf(version);
             if (idx > -1) {
-                // 已选中，取消选择
                 currentSelections.splice(idx, 1);
             } else {
-                // 未选中，添加选择
                 currentSelections.push(version);
             }
             
-            // 保存结果
             results[currentIndex].selections = [...currentSelections];
             results[currentIndex].isNone = false;
             results[currentIndex].order = [...currentOrder];
@@ -642,13 +810,11 @@
             document.getElementById('nextBtn').disabled = currentSelections.length === 0;
         }
         
-        // 选择"都不满意"（与图片选择互斥）
+        // 选择"都不满意"
         function selectNone() {
-            // 选择"都不满意"时，清除所有图片选择
             currentSelections = [];
             isNoneSelected = true;
             
-            // 保存结果
             results[currentIndex].selections = [];
             results[currentIndex].isNone = true;
             results[currentIndex].order = [...currentOrder];
@@ -659,17 +825,14 @@
         
         // 更新选择UI
         function updateSelectionUI() {
-            // 清除所有选中状态
             document.querySelectorAll('.option-card').forEach(card => {
                 card.classList.remove('selected');
             });
             document.getElementById('noneBtn').classList.remove('selected');
             
-            // 设置选中状态
             if (isNoneSelected) {
                 document.getElementById('noneBtn').classList.add('selected');
             } else {
-                // 多选：遍历所有选中的版本
                 currentSelections.forEach(version => {
                     const selectedCard = document.querySelector(`.option-card[data-version="${version}"]`);
                     if (selectedCard) selectedCard.classList.add('selected');
@@ -687,14 +850,13 @@
         // 下一题
         async function nextQuestion() {
             if (currentSelections.length === 0 && !isNoneSelected) {
-                alert('请至少选择一个选项');
+                alert(t('alert_select'));
                 return;
             }
             
             if (currentIndex < products.length - 1) {
                 showQuestion(currentIndex + 1);
             } else {
-                // 提交结果
                 await submitResults();
             }
         }
@@ -702,10 +864,11 @@
         // 提交结果
         async function submitResults() {
             document.getElementById('nextBtn').disabled = true;
-            document.getElementById('nextBtn').textContent = '提交中...';
+            document.getElementById('nextBtn').textContent = t('submitting');
             
             const submission = {
                 userId: userId,
+                language: currentLang,
                 timestamp: new Date().toISOString(),
                 results: results
             };
@@ -714,7 +877,6 @@
             const GOOGLE_SHEET_URL = 'https://script.google.com/macros/s/AKfycbzALyNflahBUW0Nrt8dDDG17C1YryZaEZQkByDbPHvA8CTSqnulIrh4y5Zipdy85Vdl/exec';
             
             try {
-                // 使用 URLSearchParams 发送表单数据
                 const formBody = new URLSearchParams();
                 formBody.append('payload', JSON.stringify(submission));
                 
@@ -727,17 +889,17 @@
                     body: formBody
                 });
                 
-                console.log('结果已提交到 Google Sheets');
+                console.log('Results submitted to Google Sheets');
             } catch (error) {
-                console.error('提交到 Google Sheets 失败:', error);
+                console.error('Failed to submit:', error);
             }
             
-            // 同时保存到本地存储作为备份
+            // 保存到本地存储
             const localResults = JSON.parse(localStorage.getItem('crowdtest_results') || '[]');
             localResults.push(submission);
             localStorage.setItem('crowdtest_results', JSON.stringify(localResults));
             
-            // 同时保存一份到本地文件（通过下载）
+            // 下载结果
             downloadResults(submission);
             
             // 显示完成页面
@@ -762,7 +924,6 @@
             document.getElementById('testScreen').style.display = 'none';
             document.getElementById('completeScreen').style.display = 'flex';
             
-            // 计算统计（多选模式）
             const stats = {
                 simple: 0,
                 extended: 0,
@@ -784,11 +945,11 @@
             });
             
             const statsHtml = `
-                <div class="stats-row"><span>简单版被选中</span><span>${stats.simple} 次</span></div>
-                <div class="stats-row"><span>扩展版被选中</span><span>${stats.extended} 次</span></div>
-                <div class="stats-row"><span>不垫图版被选中</span><span>${stats.no_reference} 次</span></div>
-                <div class="stats-row"><span>不垫图版模特被选中</span><span>${stats.no_reference_model} 次</span></div>
-                <div class="stats-row"><span>都不满意</span><span>${stats.none} 次</span></div>
+                <div class="stats-row"><span>${t('stats_simple')}</span><span>${stats.simple} ${t('times')}</span></div>
+                <div class="stats-row"><span>${t('stats_extended')}</span><span>${stats.extended} ${t('times')}</span></div>
+                <div class="stats-row"><span>${t('stats_no_reference')}</span><span>${stats.no_reference} ${t('times')}</span></div>
+                <div class="stats-row"><span>${t('stats_no_reference_model')}</span><span>${stats.no_reference_model} ${t('times')}</span></div>
+                <div class="stats-row"><span>${t('stats_none')}</span><span>${stats.none} ${t('times')}</span></div>
             `;
             
             document.getElementById('userStats').innerHTML = statsHtml;
@@ -812,4 +973,3 @@
     </script>
 </body>
 </html>
-
