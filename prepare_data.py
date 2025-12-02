@@ -65,24 +65,32 @@ def scan_results():
     for folder_name in folders:
         folder_path = os.path.join(RESULTS_FOLDER, folder_name)
         
+        # 查找文件的辅助函数（支持 jpg 和 png）
+        def find_image(folder, base_name):
+            for ext in ['.jpg', '.jpeg', '.png', '.webp']:
+                filepath = os.path.join(folder, base_name + ext)
+                if os.path.exists(filepath):
+                    return filepath
+            return None
+        
         # 检查商品图（必须有）
-        product_img_path = os.path.join(folder_path, '商品.jpg')
-        if not os.path.exists(product_img_path):
-            print(f"  跳过 {folder_name}: 缺少 商品.jpg")
+        product_img_path = find_image(folder_path, '商品')
+        if not product_img_path:
+            print(f"  跳过 {folder_name}: 缺少 商品图")
             continue
         
-        # 检查模特图（至少要有2张才能评测）
-        model_images = {
-            'simple': '简单版.jpg',
-            'extended': '扩展版.jpg',
-            'no_reference': '不垫图版.jpg',
-            'no_reference_model': '不垫图版模特.jpg'
+        # 检查模特图
+        model_image_names = {
+            'simple': '简单版',
+            'extended': '扩展版',
+            'no_reference': '不垫图版',
+            'no_reference_model': '不垫图版模特'
         }
         
         available_images = {}
-        for key, filename in model_images.items():
-            filepath = os.path.join(folder_path, filename)
-            if os.path.exists(filepath):
+        for key, base_name in model_image_names.items():
+            filepath = find_image(folder_path, base_name)
+            if filepath:
                 available_images[key] = filepath
         
         if len(available_images) < 2:
