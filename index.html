@@ -714,13 +714,32 @@
             const GOOGLE_SHEET_URL = 'https://script.google.com/macros/s/AKfycbzALyNflahBUW0Nrt8dDDG17C1YryZaEZQkByDbPHvA8CTSqnulIrh4y5Zipdy85Vdl/exec';
             
             try {
-                // 提交到 Google Sheets
-                await fetch(GOOGLE_SHEET_URL, {
-                    method: 'POST',
-                    mode: 'no-cors', // Google Apps Script 需要 no-cors 模式
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(submission)
-                });
+                // 使用 form 方式提交到 Google Sheets（更可靠）
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = GOOGLE_SHEET_URL;
+                form.target = 'hidden_iframe';
+                
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'data';
+                input.value = JSON.stringify(submission);
+                form.appendChild(input);
+                
+                // 创建隐藏的 iframe 来接收响应
+                let iframe = document.getElementById('hidden_iframe');
+                if (!iframe) {
+                    iframe = document.createElement('iframe');
+                    iframe.name = 'hidden_iframe';
+                    iframe.id = 'hidden_iframe';
+                    iframe.style.display = 'none';
+                    document.body.appendChild(iframe);
+                }
+                
+                document.body.appendChild(form);
+                form.submit();
+                document.body.removeChild(form);
+                
                 console.log('结果已提交到 Google Sheets');
             } catch (error) {
                 console.error('提交到 Google Sheets 失败:', error);
