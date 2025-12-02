@@ -65,25 +65,28 @@ def scan_results():
     for folder_name in folders:
         folder_path = os.path.join(RESULTS_FOLDER, folder_name)
         
-        # 检查必需的文件
-        required_files = {
-            'product': '商品.jpg',
+        # 检查商品图（必须有）
+        product_img_path = os.path.join(folder_path, '商品.jpg')
+        if not os.path.exists(product_img_path):
+            print(f"  跳过 {folder_name}: 缺少 商品.jpg")
+            continue
+        
+        # 检查模特图（至少要有2张才能评测）
+        model_images = {
             'simple': '简单版.jpg',
             'extended': '扩展版.jpg',
             'no_reference': '不垫图版.jpg',
             'no_reference_model': '不垫图版模特.jpg'
         }
         
-        # 检查文件是否存在
-        files_exist = True
-        for key, filename in required_files.items():
+        available_images = {}
+        for key, filename in model_images.items():
             filepath = os.path.join(folder_path, filename)
-            if not os.path.exists(filepath):
-                print(f"  跳过 {folder_name}: 缺少 {filename}")
-                files_exist = False
-                break
+            if os.path.exists(filepath):
+                available_images[key] = filepath
         
-        if not files_exist:
+        if len(available_images) < 2:
+            print(f"  跳过 {folder_name}: 模特图不足2张 (只有 {len(available_images)} 张)")
             continue
         
         # 创建商品数据
@@ -105,35 +108,22 @@ def scan_results():
             # 复制图片文件
             product_folder = os.path.join(IMAGES_FOLDER, product_id)
             
+            # 构建图片数据（只复制存在的图片）
+            images_data = {}
+            for key, filepath in available_images.items():
+                images_data[key] = copy_image(filepath, product_folder, key, product_id)
+            
             product_data = {
                 'id': product_id,
                 'name': folder_name,
-                'productImage': copy_image(
-                    os.path.join(folder_path, '商品.jpg'),
-                    product_folder, 'product', product_id
-                ),
-                'images': {
-                    'simple': copy_image(
-                        os.path.join(folder_path, '简单版.jpg'),
-                        product_folder, 'simple', product_id
-                    ),
-                    'extended': copy_image(
-                        os.path.join(folder_path, '扩展版.jpg'),
-                        product_folder, 'extended', product_id
-                    ),
-                    'no_reference': copy_image(
-                        os.path.join(folder_path, '不垫图版.jpg'),
-                        product_folder, 'no_reference', product_id
-                    ),
-                    'no_reference_model': copy_image(
-                        os.path.join(folder_path, '不垫图版模特.jpg'),
-                        product_folder, 'no_reference_model', product_id
-                    )
-                }
+                'productImage': copy_image(product_img_path, product_folder, 'product', product_id),
+                'images': images_data
             }
+            
+            img_count = len(available_images)
+            print(f"  ✓ 已处理: {folder_name} ({img_count}张模特图)")
         
         products.append(product_data)
-        print(f"  ✓ 已处理: {folder_name}")
     
     return products
 

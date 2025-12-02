@@ -168,15 +168,9 @@
         
         .options-grid {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 20px;
             margin-bottom: 30px;
-        }
-        
-        @media (max-width: 1200px) {
-            .options-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
         }
         
         @media (max-width: 600px) {
@@ -578,8 +572,9 @@
             // 显示商品图
             document.getElementById('productImage').src = product.productImage;
             
-            // 随机打乱四个版本的顺序
-            const versions = ['simple', 'extended', 'no_reference', 'no_reference_model'];
+            // 根据商品实际拥有的图片动态生成版本列表
+            const allVersions = ['simple', 'extended', 'no_reference', 'no_reference_model'];
+            const versions = allVersions.filter(v => product.images[v]);
             currentOrder = shuffleArray([...versions]);
             
             // 生成选项
