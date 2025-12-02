@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>模特图效果众测</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        /* 欢迎页面 */
+        .welcome-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            text-align: center;
+        }
+        
+        .welcome-card {
+            background: white;
+            border-radius: 24px;
+            padding: 60px 50px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 500px;
+        }
+        
+        .welcome-card h1 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .welcome-card p {
+            color: #666;
+            margin-bottom: 30px;
+            line-height: 1.8;
+        }
+        
+        .user-input {
+            margin-bottom: 30px;
+        }
+        
+        .user-input label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .user-input input {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+        
+        .user-input input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .btn {
+            padding: 15px 40px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        /* 评测页面 */
+        .test-screen {
+            display: none;
+            padding: 30px 20px;
+        }
+        
+        .progress-bar {
+            background: rgba(255,255,255,0.3);
+            border-radius: 10px;
+            height: 8px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            background: white;
+            height: 100%;
+            border-radius: 10px;
+            transition: width 0.5s ease;
+        }
+        
+        .progress-text {
+            color: white;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 1.1rem;
+        }
+        
+        .test-card {
+            background: white;
+            border-radius: 24px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+        }
+        
+        .product-section {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 30px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        
+        .product-section h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+        }
+        
+        .product-image {
+            max-width: 300px;
+            max-height: 300px;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        .question-text {
+            text-align: center;
+            font-size: 1.2rem;
+            color: #333;
+            margin-bottom: 30px;
+            font-weight: 500;
+        }
+        
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        @media (max-width: 1200px) {
+            .options-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        @media (max-width: 600px) {
+            .options-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .option-card {
+            position: relative;
+            border: 3px solid #e0e0e0;
+            border-radius: 16px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .option-card:hover {
+            border-color: #667eea;
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(102, 126, 234, 0.2);
+        }
+        
+        .option-card.selected {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.3);
+        }
+        
+        .option-card img {
+            width: 100%;
+            aspect-ratio: 3/4;
+            object-fit: cover;
+            display: block;
+        }
+        
+        .option-label {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+        
+        .option-card.selected .option-label {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+        }
+        
+        .check-icon {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            width: 30px;
+            height: 30px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 50%;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+        }
+        
+        .option-card.selected .check-icon {
+            display: flex;
+        }
+        
+        .zoom-btn {
+            position: absolute;
+            bottom: 15px;
+            right: 15px;
+            width: 36px;
+            height: 36px;
+            background: rgba(0,0,0,0.6);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            opacity: 0.7;
+        }
+        
+        .zoom-btn:hover {
+            opacity: 1;
+            background: rgba(0,0,0,0.8);
+            transform: scale(1.1);
+        }
+        
+        .none-option {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .none-btn {
+            padding: 15px 30px;
+            border: 2px solid #e0e0e0;
+            background: white;
+            border-radius: 12px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: #666;
+        }
+        
+        .none-btn:hover {
+            border-color: #ff6b6b;
+            color: #ff6b6b;
+        }
+        
+        .none-btn.selected {
+            border-color: #ff6b6b;
+            background: #fff5f5;
+            color: #ff6b6b;
+        }
+        
+        .action-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+        
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #666;
+        }
+        
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+        
+        /* 完成页面 */
+        .complete-screen {
+            display: none;
+            min-height: 100vh;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .complete-card {
+            background: white;
+            border-radius: 24px;
+            padding: 60px 50px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        .complete-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+        }
+        
+        .complete-card h2 {
+            font-size: 2rem;
+            color: #333;
+            margin-bottom: 15px;
+        }
+        
+        .complete-card p {
+            color: #666;
+            margin-bottom: 30px;
+        }
+        
+        .stats-summary {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stats-summary h3 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+        
+        .stats-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .stats-row:last-child {
+            border-bottom: none;
+        }
+        
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: white;
+        }
+        
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Image modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.9);
+            z-index: 1000;
+            cursor: pointer;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal img {
+            max-width: 90%;
+            max-height: 90%;
+            object-fit: contain;
+        }
+        
+        .modal-close {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            color: white;
+            font-size: 2rem;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <!-- 欢迎页面 -->
+    <div id="welcomeScreen" class="welcome-screen">
+        <div class="welcome-card">
+            <h1>🎨 模特图效果众测</h1>
+            <p>
+                感谢您参与本次众测！<br><br>
+                您将看到一系列商品图及其对应的模特展示图。<br>
+                请选择您认为最吸引人的那张照片。<br><br>
+                预计用时：5-10分钟
+            </p>
+            <div class="user-input">
+                <label for="userId">请输入您的用户ID（昵称）</label>
+                <input type="text" id="userId" placeholder="例如：张三" maxlength="50">
+            </div>
+            <button class="btn btn-primary" id="startBtn" onclick="startTest()">开始评测</button>
+        </div>
+    </div>
+    
+    <!-- 评测页面 -->
+    <div id="testScreen" class="test-screen">
+        <div class="container">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+            </div>
+            <div class="progress-text" id="progressText">第 1 题 / 共 0 题</div>
+            
+            <div class="test-card">
+                <div class="product-section">
+                    <h2>📦 商品图</h2>
+                    <img id="productImage" class="product-image" src="" alt="商品图" onclick="showModal(this.src)">
+                </div>
+                
+                <div class="question-text">
+                    请选择全部你觉得在社媒看到可以吸引到你的照片（可多选），如都不满意选择"都不满意"
+                </div>
+                
+                <div class="options-grid" id="optionsGrid">
+                    <!-- Options will be generated by JavaScript -->
+                </div>
+                
+                <div class="none-option">
+                    <button class="none-btn" id="noneBtn" onclick="selectNone()">
+                        😕 都不满意
+                    </button>
+                </div>
+                
+                <div class="action-buttons">
+                    <button class="btn btn-secondary" id="prevBtn" onclick="prevQuestion()" style="display:none">上一题</button>
+                    <button class="btn btn-primary" id="nextBtn" onclick="nextQuestion()" disabled>下一题</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 完成页面 -->
+    <div id="completeScreen" class="complete-screen">
+        <div class="complete-card">
+            <div class="complete-icon">🎉</div>
+            <h2>感谢您的参与！</h2>
+            <p>您的评测结果已保存</p>
+            <div class="stats-summary" id="statsSummary">
+                <h3>您的选择统计</h3>
+                <div id="userStats"></div>
+            </div>
+            <button class="btn btn-primary" onclick="location.reload()">再次评测</button>
+        </div>
+    </div>
+    
+    <!-- Image Modal -->
+    <div class="modal" id="imageModal" onclick="closeModal()">
+        <span class="modal-close">&times;</span>
+        <img id="modalImage" src="">
+    </div>
+    
+    <script>
+        // 全局变量
+        let userId = '';
+        let products = [];
+        let currentIndex = 0;
+        let results = [];
+        let currentSelections = []; // 改为数组支持多选
+        let isNoneSelected = false; // 是否选择了"都不满意"
+        let currentOrder = []; // 记录当前题目的随机顺序
+        
+        // 版本映射
+        const VERSION_NAMES = {
+            'simple': '简单版',
+            'extended': '扩展版',
+            'no_reference': '不垫图版',
+            'no_reference_model': '不垫图版模特'
+        };
+        
+        // 初始化
+        document.getElementById('userId').addEventListener('input', function() {
+            document.getElementById('startBtn').disabled = !this.value.trim();
+        });
+        
+        // 加载商品数据
+        async function loadProducts() {
+            try {
+                const response = await fetch('products.json?t=' + Date.now());
+                if (!response.ok) throw new Error('无法加载商品数据');
+                products = await response.json();
+                return true;
+            } catch (error) {
+                alert('加载数据失败：' + error.message + '\n请确保已运行数据准备脚本。');
+                return false;
+            }
+        }
+        
+        // 开始评测
+        async function startTest() {
+            userId = document.getElementById('userId').value.trim();
+            if (!userId) {
+                alert('请输入用户ID');
+                return;
+            }
+            
+            document.getElementById('startBtn').disabled = true;
+            document.getElementById('startBtn').textContent = '加载中...';
+            
+            const loaded = await loadProducts();
+            if (!loaded || products.length === 0) {
+                document.getElementById('startBtn').disabled = false;
+                document.getElementById('startBtn').textContent = '开始评测';
+                return;
+            }
+            
+            // 初始化结果数组
+            results = products.map(p => ({
+                productId: p.id,
+                productName: p.name,
+                selections: [], // 改为数组支持多选
+                isNone: false,  // 是否选择了"都不满意"
+                order: null
+            }));
+            
+            // 切换到评测页面
+            document.getElementById('welcomeScreen').style.display = 'none';
+            document.getElementById('testScreen').style.display = 'block';
+            
+            showQuestion(0);
+        }
+        
+        // 显示问题
+        function showQuestion(index) {
+            currentIndex = index;
+            const product = products[index];
+            
+            // 更新进度
+            const progress = ((index + 1) / products.length) * 100;
+            document.getElementById('progressFill').style.width = progress + '%';
+            document.getElementById('progressText').textContent = `第 ${index + 1} 题 / 共 ${products.length} 题`;
+            
+            // 显示商品图
+            document.getElementById('productImage').src = product.productImage;
+            
+            // 随机打乱四个版本的顺序
+            const versions = ['simple', 'extended', 'no_reference', 'no_reference_model'];
+            currentOrder = shuffleArray([...versions]);
+            
+            // 生成选项
+            const optionsGrid = document.getElementById('optionsGrid');
+            optionsGrid.innerHTML = '';
+            
+            currentOrder.forEach((version, i) => {
+                const imageSrc = product.images[version];
+                const card = document.createElement('div');
+                card.className = 'option-card';
+                card.dataset.version = version;
+                card.onclick = () => selectOption(version);
+                
+                card.innerHTML = `
+                    <span class="option-label">图像 ${i + 1}</span>
+                    <span class="check-icon">✓</span>
+                    <img src="${imageSrc}" alt="图像 ${i + 1}">
+                    <span class="zoom-btn" onclick="event.stopPropagation(); showModal('${imageSrc}')" title="放大查看">🔍</span>
+                `;
+                
+                optionsGrid.appendChild(card);
+            });
+            
+            // 恢复之前的选择（如果有）
+            currentSelections = results[index].selections ? [...results[index].selections] : [];
+            isNoneSelected = results[index].isNone || false;
+            updateSelectionUI();
+            
+            // 更新按钮状态
+            document.getElementById('prevBtn').style.display = index > 0 ? 'inline-block' : 'none';
+            document.getElementById('nextBtn').textContent = index === products.length - 1 ? '提交' : '下一题';
+            document.getElementById('nextBtn').disabled = currentSelections.length === 0 && !isNoneSelected;
+        }
+        
+        // 随机打乱数组
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+        
+        // 选择选项（多选，与"都不满意"互斥）
+        function selectOption(version) {
+            // 选择图片时，清除"都不满意"状态
+            isNoneSelected = false;
+            
+            // 切换选中状态
+            const idx = currentSelections.indexOf(version);
+            if (idx > -1) {
+                // 已选中，取消选择
+                currentSelections.splice(idx, 1);
+            } else {
+                // 未选中，添加选择
+                currentSelections.push(version);
+            }
+            
+            // 保存结果
+            results[currentIndex].selections = [...currentSelections];
+            results[currentIndex].isNone = false;
+            results[currentIndex].order = [...currentOrder];
+            
+            updateSelectionUI();
+            document.getElementById('nextBtn').disabled = currentSelections.length === 0;
+        }
+        
+        // 选择"都不满意"（与图片选择互斥）
+        function selectNone() {
+            // 选择"都不满意"时，清除所有图片选择
+            currentSelections = [];
+            isNoneSelected = true;
+            
+            // 保存结果
+            results[currentIndex].selections = [];
+            results[currentIndex].isNone = true;
+            results[currentIndex].order = [...currentOrder];
+            
+            updateSelectionUI();
+            document.getElementById('nextBtn').disabled = false;
+        }
+        
+        // 更新选择UI
+        function updateSelectionUI() {
+            // 清除所有选中状态
+            document.querySelectorAll('.option-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            document.getElementById('noneBtn').classList.remove('selected');
+            
+            // 设置选中状态
+            if (isNoneSelected) {
+                document.getElementById('noneBtn').classList.add('selected');
+            } else {
+                // 多选：遍历所有选中的版本
+                currentSelections.forEach(version => {
+                    const selectedCard = document.querySelector(`.option-card[data-version="${version}"]`);
+                    if (selectedCard) selectedCard.classList.add('selected');
+                });
+            }
+        }
+        
+        // 上一题
+        function prevQuestion() {
+            if (currentIndex > 0) {
+                showQuestion(currentIndex - 1);
+            }
+        }
+        
+        // 下一题
+        async function nextQuestion() {
+            if (currentSelections.length === 0 && !isNoneSelected) {
+                alert('请至少选择一个选项');
+                return;
+            }
+            
+            if (currentIndex < products.length - 1) {
+                showQuestion(currentIndex + 1);
+            } else {
+                // 提交结果
+                await submitResults();
+            }
+        }
+        
+        // 提交结果
+        async function submitResults() {
+            document.getElementById('nextBtn').disabled = true;
+            document.getElementById('nextBtn').textContent = '提交中...';
+            
+            const submission = {
+                userId: userId,
+                timestamp: new Date().toISOString(),
+                results: results
+            };
+            
+            try {
+                const response = await fetch('submit.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(submission)
+                });
+                
+                if (!response.ok) throw new Error('提交失败');
+            } catch (error) {
+                // 如果服务器提交失败，保存到本地存储
+                const localResults = JSON.parse(localStorage.getItem('crowdtest_results') || '[]');
+                localResults.push(submission);
+                localStorage.setItem('crowdtest_results', JSON.stringify(localResults));
+                console.log('结果已保存到本地存储');
+            }
+            
+            // 同时保存一份到本地文件（通过下载）
+            downloadResults(submission);
+            
+            // 显示完成页面
+            showCompleteScreen();
+        }
+        
+        // 下载结果
+        function downloadResults(submission) {
+            const blob = new Blob([JSON.stringify(submission, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `result_${userId}_${Date.now()}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+        
+        // 显示完成页面
+        function showCompleteScreen() {
+            document.getElementById('testScreen').style.display = 'none';
+            document.getElementById('completeScreen').style.display = 'flex';
+            
+            // 计算统计（多选模式）
+            const stats = {
+                simple: 0,
+                extended: 0,
+                no_reference: 0,
+                no_reference_model: 0,
+                none: 0
+            };
+            
+            results.forEach(r => {
+                if (r.isNone) {
+                    stats.none++;
+                } else if (r.selections && r.selections.length > 0) {
+                    r.selections.forEach(sel => {
+                        if (stats.hasOwnProperty(sel)) {
+                            stats[sel]++;
+                        }
+                    });
+                }
+            });
+            
+            const statsHtml = `
+                <div class="stats-row"><span>简单版被选中</span><span>${stats.simple} 次</span></div>
+                <div class="stats-row"><span>扩展版被选中</span><span>${stats.extended} 次</span></div>
+                <div class="stats-row"><span>不垫图版被选中</span><span>${stats.no_reference} 次</span></div>
+                <div class="stats-row"><span>不垫图版模特被选中</span><span>${stats.no_reference_model} 次</span></div>
+                <div class="stats-row"><span>都不满意</span><span>${stats.none} 次</span></div>
+            `;
+            
+            document.getElementById('userStats').innerHTML = statsHtml;
+        }
+        
+        // 显示图片模态框
+        function showModal(src) {
+            document.getElementById('modalImage').src = src;
+            document.getElementById('imageModal').style.display = 'flex';
+        }
+        
+        // 关闭模态框
+        function closeModal() {
+            document.getElementById('imageModal').style.display = 'none';
+        }
+        
+        // ESC关闭模态框
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') closeModal();
+        });
+    </script>
+</body>
+</html>
+
