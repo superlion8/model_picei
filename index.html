@@ -710,21 +710,26 @@
                 results: results
             };
             
+            // Google Sheets Web App URL
+            const GOOGLE_SHEET_URL = 'https://script.google.com/macros/s/AKfycbzALyNflahBUW0Nrt8dDDG17C1YryZaEZQkByDbPHvA8CTSqnulIrh4y5Zipdy85Vdl/exec';
+            
             try {
-                const response = await fetch('submit.php', {
+                // 提交到 Google Sheets
+                await fetch(GOOGLE_SHEET_URL, {
                     method: 'POST',
+                    mode: 'no-cors', // Google Apps Script 需要 no-cors 模式
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(submission)
                 });
-                
-                if (!response.ok) throw new Error('提交失败');
+                console.log('结果已提交到 Google Sheets');
             } catch (error) {
-                // 如果服务器提交失败，保存到本地存储
-                const localResults = JSON.parse(localStorage.getItem('crowdtest_results') || '[]');
-                localResults.push(submission);
-                localStorage.setItem('crowdtest_results', JSON.stringify(localResults));
-                console.log('结果已保存到本地存储');
+                console.error('提交到 Google Sheets 失败:', error);
             }
+            
+            // 同时保存到本地存储作为备份
+            const localResults = JSON.parse(localStorage.getItem('crowdtest_results') || '[]');
+            localResults.push(submission);
+            localStorage.setItem('crowdtest_results', JSON.stringify(localResults));
             
             // 同时保存一份到本地文件（通过下载）
             downloadResults(submission);
